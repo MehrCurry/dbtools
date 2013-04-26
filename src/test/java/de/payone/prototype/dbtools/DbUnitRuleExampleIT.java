@@ -3,27 +3,44 @@ package de.payone.prototype.dbtools;
 import com.danhaywood.tdd.dbunit.DbUnitRule;
 import com.danhaywood.tdd.dbunit.DbUnitRule.Ddl;
 import com.danhaywood.tdd.dbunit.DbUnitRule.JsonData;
+import org.apache.commons.lang3.Validate;
 import org.dbunit.Assertion;
 import org.dbunit.dataset.ITable;
-import org.hsqldb.jdbcDriver;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class DbUnitRuleExample {
+public class DbUnitRuleExampleIT {
 
     @Rule
-    public DbUnitRule dbUnit = new DbUnitRule(
-            DbUnitRuleExample.class, jdbcDriver.class,
-            "jdbc:hsqldb:mem:testdb", "SA", "");
+    public DbUnitRule dbUnit = createRule();
 
-    @Ddl("/customer.ddl")
+    private DbUnitRule createRule()  {
+        Properties props=new Properties();
+        try {
+            final InputStream resourceAsStream = DbUnitRule.class.getResourceAsStream("/liquibase.properties");
+            Validate.notNull(resourceAsStream,"Ressouce not found");
+            props.load(resourceAsStream);
+            return new DbUnitRule(
+                    DbUnitRuleExampleIT.class, Class.forName(props.getProperty("driver")),
+                    props.getProperty("url"), props.getProperty("username"), props.getProperty("password"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Ddl("migrations/db.changelog-master.xml")
     @JsonData("/customer.json")
     @Test
     public void update_lastName() throws Exception {

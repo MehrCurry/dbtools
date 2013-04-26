@@ -1,7 +1,9 @@
 package com.danhaywood.tdd.dbunit;
 
-import com.google.common.io.Resources;
 import de.payone.prototype.dbtools.JSONDataSet;
+import liquibase.Liquibase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.database.IDatabaseConnection;
@@ -12,14 +14,16 @@ import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
+import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.nio.charset.Charset;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 public class DbUnitRule implements MethodRule {
 
@@ -57,7 +61,6 @@ public class DbUnitRule implements MethodRule {
 
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
-
         return new Statement() {
 
             @Override
@@ -68,8 +71,19 @@ public class DbUnitRule implements MethodRule {
                     if (ddl != null) {
                         String[] values = ddl.value();
                         for (String value : values) {
-                            executeUpdate(Resources.toString(
-                                    resourceBase.getResource(value), Charset.defaultCharset()));
+                            final ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(DbUnitRule.class.getClassLoader());
+                            InputStream is=resourceAccessor.toClassLoader().getResourceAsStream(value);
+                            Enumeration <URL> e = resourceAccessor.toClassLoader().getResources("");
+                            while (e.hasMoreElements())
+                            {
+                                System.out.println("ClassLoader Resource: " + e.nextElement());
+                            }
+                            System.out.println("Class Resource: " + DbUnitRule.class.getResource("/"));
+                            System.out.println("Class Resource: " + resourceBase.getClassLoader().getResourceAsStream(value));
+                            Liquibase lb=new Liquibase(value, resourceAccessor,new JdbcConnection(connection));
+                            lb.update("");
+//                            executeUpdate(Resources.toString(
+//                                    resourceBase.getResource(value), Charset.defaultCharset()));
                         }
                     }
 

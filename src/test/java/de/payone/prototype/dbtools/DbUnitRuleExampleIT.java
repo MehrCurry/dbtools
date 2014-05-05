@@ -40,7 +40,6 @@ public class DbUnitRuleExampleIT {
         }
     }
 
-    @Ddl("migrations/db.changelog-master.xml")
     @JsonData("/customer.json")
     @Test
     public void update_lastName() throws Exception {

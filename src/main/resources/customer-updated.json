@@ -5,7 +5,8 @@
                 "id": 1,
                 "first_name": "John",
                 "initial": "K",
-                "last_name": "Smith"
+                "last_name": "Smith",
+                "date_of_birth": null
             },
             {
                 "id": 2,

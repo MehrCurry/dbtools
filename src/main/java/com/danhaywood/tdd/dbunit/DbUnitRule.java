@@ -1,29 +1,24 @@
 package com.danhaywood.tdd.dbunit;
 
 import de.payone.prototype.dbtools.JSONDataSet;
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.ITable;
+import org.flywaydb.core.Flyway;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 
-import java.io.InputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Enumeration;
 
 public class DbUnitRule implements MethodRule {
 
@@ -50,6 +45,11 @@ public class DbUnitRule implements MethodRule {
     public DbUnitRule(Class<?> resourceBase, Class<?> driver, String url, String user, String password) {
         this.resourceBase = resourceBase;
         try {
+            Flyway flyway=new Flyway();
+            flyway.setDataSource(url,user,password);
+            flyway.setLocations("classpath:flyway");
+            flyway.migrate();
+
             databaseTester = new JdbcDatabaseTester(driver.getName(), url, user, password);
             dbUnitConnection = databaseTester.getConnection();
             connection = dbUnitConnection.getConnection();
@@ -67,26 +67,6 @@ public class DbUnitRule implements MethodRule {
             public void evaluate() throws Throwable {
 
                 try {
-                    Ddl ddl = method.getAnnotation(Ddl.class);
-                    if (ddl != null) {
-                        String[] values = ddl.value();
-                        for (String value : values) {
-                            final ClassLoaderResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor(DbUnitRule.class.getClassLoader());
-                            InputStream is=resourceAccessor.toClassLoader().getResourceAsStream(value);
-                            Enumeration <URL> e = resourceAccessor.toClassLoader().getResources("");
-                            while (e.hasMoreElements())
-                            {
-                                System.out.println("ClassLoader Resource: " + e.nextElement());
-                            }
-                            System.out.println("Class Resource: " + DbUnitRule.class.getResource("/"));
-                            System.out.println("Class Resource: " + resourceBase.getClassLoader().getResourceAsStream(value));
-                            Liquibase lb=new Liquibase(value, resourceAccessor,new JdbcConnection(connection));
-                            lb.update("");
-//                            executeUpdate(Resources.toString(
-//                                    resourceBase.getResource(value), Charset.defaultCharset()));
-                        }
-                    }
-
                     JsonData data = method.getAnnotation(JsonData.class);
                     if (data != null) {
                         IDataSet ds = new JSONDataSet(resourceBase.getResourceAsStream(data.value()));

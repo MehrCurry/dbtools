@@ -1,0 +1,2 @@
+ALTER TABLE customer
+  ADD DATE_OF_BIRTH DATE

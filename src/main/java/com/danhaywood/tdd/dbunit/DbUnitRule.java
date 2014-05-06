@@ -22,6 +22,11 @@ import java.sql.SQLException;
 
 public class DbUnitRule implements MethodRule {
 
+    private final Class<?> driver;
+    private final String url;
+    private final String user;
+    private final String password;
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ ElementType.METHOD })
     public static @interface Ddl {
@@ -44,12 +49,11 @@ public class DbUnitRule implements MethodRule {
 
     public DbUnitRule(Class<?> resourceBase, Class<?> driver, String url, String user, String password) {
         this.resourceBase = resourceBase;
+        this.driver=driver;
+        this.url=url;
+        this.user=user;
+        this.password=password;
         try {
-            Flyway flyway=new Flyway();
-            flyway.setDataSource(url,user,password);
-            flyway.setLocations("classpath:flyway");
-            flyway.migrate();
-
             databaseTester = new JdbcDatabaseTester(driver.getName(), url, user, password);
             dbUnitConnection = databaseTester.getConnection();
             connection = dbUnitConnection.getConnection();
@@ -57,6 +61,14 @@ public class DbUnitRule implements MethodRule {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void migrate() {
+        Flyway flyway=new Flyway();
+        flyway.setDataSource(url,user,password);
+        flyway.setInitOnMigrate(true);
+        flyway.setLocations("classpath:flyway");
+        flyway.migrate();
     }
 
     @Override
@@ -73,6 +85,7 @@ public class DbUnitRule implements MethodRule {
                         databaseTester.setDataSet(ds);
                     }
 
+                    migrate();
                     databaseTester.onSetup();
                     base.evaluate();
                 } finally {

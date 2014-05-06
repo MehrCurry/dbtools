@@ -1,7 +1,6 @@
 package de.payone.prototype.dbtools;
 
 import com.danhaywood.tdd.dbunit.DbUnitRule;
-import com.danhaywood.tdd.dbunit.DbUnitRule.Ddl;
 import com.danhaywood.tdd.dbunit.DbUnitRule.JsonData;
 import org.apache.commons.lang3.Validate;
 import org.dbunit.Assertion;
@@ -27,7 +26,7 @@ public class DbUnitRuleExampleIT {
     private DbUnitRule createRule()  {
         Properties props=new Properties();
         try {
-            final InputStream resourceAsStream = DbUnitRule.class.getResourceAsStream("/liquibase.properties");
+            final InputStream resourceAsStream = DbUnitRule.class.getResourceAsStream("/database.properties");
             Validate.notNull(resourceAsStream,"Ressouce not found");
             props.load(resourceAsStream);
             return new DbUnitRule(

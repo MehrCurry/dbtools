@@ -47,6 +47,7 @@ public class DbUnitRule implements MethodRule {
         try {
             Flyway flyway=new Flyway();
             flyway.setDataSource(url,user,password);
+            flyway.setInitOnMigrate(true);
             flyway.setLocations("classpath:flyway");
             flyway.migrate();
 

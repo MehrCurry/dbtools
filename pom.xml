@@ -7,6 +7,7 @@
   <groupId>de.payone.prototype</groupId>
   <artifactId>dbtools</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
   <properties>
     <liquibase.version>3.3.0</liquibase.version>
@@ -17,6 +18,11 @@
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <version>[2.2.9,)</version>
+    </dependency>
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>[5.1.30,)</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -154,6 +160,13 @@
       <id>prod</id>
       <properties>
         <liquibase.db>prod</liquibase.db>
+        <liquibase.dropFirst>false</liquibase.dropFirst>
+      </properties>
+    </profile>
+    <profile>
+      <id>docker</id>
+      <properties>
+        <liquibase.db>docker</liquibase.db>
         <liquibase.dropFirst>false</liquibase.dropFirst>
       </properties>
     </profile>

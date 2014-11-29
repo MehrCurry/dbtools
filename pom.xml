@@ -7,7 +7,11 @@
   <groupId>de.payone.prototype</groupId>
   <artifactId>dbtools</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>pom</packaging>
+  <modules>
+    <module>sample</module>
+    <module>sample2</module>
+  </modules>
 
   <properties>
     <liquibase.version>3.3.0</liquibase.version>
@@ -76,25 +80,6 @@
       </resource>
     </resources>
     <plugins>
-      <plugin>
-        <groupId>org.liquibase</groupId>
-        <artifactId>liquibase-maven-plugin</artifactId>
-        <version>${liquibase.version}</version>
-        <executions>
-          <execution>
-            <phase>process-resources</phase>
-            <configuration>
-              <skip>${liquibase.skip}</skip>
-              <propertyFile>liquibase.properties</propertyFile>
-              <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-              <dropFirst>${liquibase.dropFirst}</dropFirst>
-            </configuration>
-            <goals>
-              <goal>update</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>

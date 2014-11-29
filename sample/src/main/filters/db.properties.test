@@ -1,0 +1,6 @@
+liquibase.contexts=test
+liquibase.skip=true
+dataSource.project.driverClass=org.h2.Driver
+dataSource.project.jdbcURL=jdbc:h2:mem:sampleTestDB
+dataSource.project.user=SA
+dataSource.project.password=

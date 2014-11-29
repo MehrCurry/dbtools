@@ -1,0 +1,5 @@
+liquibase.contexts=docker
+dataSource.project.driverClass=com.mysql.jdbc.Driver
+dataSource.project.jdbcURL=jdbc:mysql://${mysql.host}/sample?createDatabaseIfNotExist=true
+dataSource.project.user=admin
+dataSource.project.password=${mysql.pass}

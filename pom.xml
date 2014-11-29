@@ -67,6 +67,27 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <driver>org.h2.Driver</driver>
+                    <url>jdbc:h2:file:db/devdb</url>
+                    <user>SA</user>
+                    <password/>
+                    <locations>
+                        <location>filesystem:src/main/resources/flyway</location>
+                    </locations>
+                    <schemas>
+                        <schema>PUBLIC</schema>
+                    </schemas>
+                    <placeholders>
+                        <keyABC>valueXYZ</keyABC>
+                        <otherplaceholder>value123</otherplaceholder>
+                    </placeholders>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>2.0.2</version>

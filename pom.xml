@@ -15,14 +15,11 @@
 
   <properties>
     <liquibase.version>3.3.0</liquibase.version>
+    <liquibase.skip>true</liquibase.skip>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.hsqldb</groupId>
-      <artifactId>hsqldb</artifactId>
-      <version>[2.2.9,)</version>
-    </dependency>
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
@@ -70,16 +67,79 @@
     </dependency>
   </dependencies>
   <build>
-    <filters>
-      <filter>src/main/filters/db.properties.${liquibase.db}</filter>
-    </filters>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
     <plugins>
+      <plugin>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <version>${liquibase.version}</version>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <configuration>
+              <skip>${liquibase.skip}</skip>
+              <changeLogFile>migrations/db.changelog-master.xml</changeLogFile>
+              <driver>${dataSource.project.driverClass}</driver>
+              <url>${dataSource.project.jdbcURL}</url>
+              <username>${dataSource.project.user}</username>
+              <password>${dataSource.project.password}</password>
+              <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+              <dropFirst>${liquibase.dropFirst}</dropFirst>
+            </configuration>
+            <goals>
+              <goal>update</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sql-maven-plugin</artifactId>
+        <version>1.5</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>[1.3.160,)</version>
+          </dependency>
+          <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>[5.1.30,)</version>
+          </dependency>
+        </dependencies>
+
+        <!-- common configuration shared by all executions -->
+        <configuration>
+          <driver>${dataSource.project.driverClass}</driver>
+          <url>${dataSource.project.jdbcURL}</url>
+          <username>${dataSource.project.user}</username>
+          <password>${dataSource.project.password}</password>
+          <!-- You can comment out username/password configurations and
+               have maven to look them up in your settings.xml using ${settingsKey}
+          -->
+          <settingsKey>sensibleKey</settingsKey>
+          <!--all executions are ignored if -Dmaven.test.skip=true-->
+          <skip>${maven.test.skip}</skip>
+        </configuration>
+        <executions>
+          <execution>
+            <id>create-data</id>
+            <phase>process-test-resources</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <orderFile>ascending</orderFile>
+              <fileset>
+                <basedir>${basedir}</basedir>
+                <includes>
+                  <include>src/main/sql/dump.sql</include>
+                </includes>
+              </fileset>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -131,13 +191,6 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <properties>
-        <liquibase.db>dev</liquibase.db>
-        <!--
-        dataSource.project.driverClass=org.h2.Driver
-        dataSource.project.jdbcURL=jdbc:h2:file:./db/sampleDevDB
-        dataSource.project.user=SA
-        dataSource.project.password=
-        -->
         <dataSource.project.driverClass>org.h2.Driver</dataSource.project.driverClass>
         <dataSource.project.jdbcURL>jdbc:h2:file:./db/sampleDevDB</dataSource.project.jdbcURL>
         <dataSource.project.user>SA</dataSource.project.user>
@@ -147,9 +200,8 @@
     <profile>
       <id>test</id>
       <properties>
-        <liquibase.db>test</liquibase.db>
         <dataSource.project.driverClass>org.h2.Driver</dataSource.project.driverClass>
-        <dataSource.project.jdbcURL>jdbc:h2:mem:sampleTestDB</dataSource.project.jdbcURL>
+        <dataSource.project.jdbcURL>jdbc:h2:mem:${datasource.project.dbname}</dataSource.project.jdbcURL>
         <dataSource.project.user>SA</dataSource.project.user>
         <dataSource.project.password/>
         <liquibase.dropFirst>true</liquibase.dropFirst>
@@ -158,9 +210,8 @@
     <profile>
       <id>prod</id>
       <properties>
-        <liquibase.db>prod</liquibase.db>
-        <dataSource.project.driverClass>org.hsqldb.jdbcDriver</dataSource.project.driverClass>
-        <dataSource.project.jdbcURL>jdbc:hsqldb:file:./db/sampleProdDB</dataSource.project.jdbcURL>
+        <dataSource.project.driverClass>org.h2.Driver</dataSource.project.driverClass>
+        <dataSource.project.jdbcURL>jdbc:h2:file:./db/${datasource.project.dbname}</dataSource.project.jdbcURL>
         <dataSource.project.user>SA</dataSource.project.user>
         <dataSource.project.password/>
         <liquibase.dropFirst>false</liquibase.dropFirst>
@@ -171,7 +222,7 @@
       <properties>
         <liquibase.db>docker</liquibase.db>
         <dataSource.project.driverClass>com.mysql.jdbc.Driver</dataSource.project.driverClass>
-        <dataSource.project.jdbcURL>jdbc:mysql://${mysql.host}/sample?createDatabaseIfNotExist=true</dataSource.project.jdbcURL>
+        <dataSource.project.jdbcURL>jdbc:mysql://${mysql.host}/${datasource.project.dbname}?createDatabaseIfNotExist=true</dataSource.project.jdbcURL>
         <dataSource.project.user>admin</dataSource.project.user>
         <dataSource.project.password>${mysql.pass}</dataSource.project.password>
         <liquibase.dropFirst>false</liquibase.dropFirst>

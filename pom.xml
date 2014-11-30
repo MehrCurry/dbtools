@@ -132,12 +132,26 @@
       </activation>
       <properties>
         <liquibase.db>dev</liquibase.db>
+        <!--
+        dataSource.project.driverClass=org.h2.Driver
+        dataSource.project.jdbcURL=jdbc:h2:file:./db/sampleDevDB
+        dataSource.project.user=SA
+        dataSource.project.password=
+        -->
+        <dataSource.project.driverClass>org.h2.Driver</dataSource.project.driverClass>
+        <dataSource.project.jdbcURL>jdbc:h2:file:./db/sampleDevDB</dataSource.project.jdbcURL>
+        <dataSource.project.user>SA</dataSource.project.user>
+        <dataSource.project.password/>
       </properties>
     </profile>
     <profile>
       <id>test</id>
       <properties>
         <liquibase.db>test</liquibase.db>
+        <dataSource.project.driverClass>org.h2.Driver</dataSource.project.driverClass>
+        <dataSource.project.jdbcURL>jdbc:h2:mem:sampleTestDB</dataSource.project.jdbcURL>
+        <dataSource.project.user>SA</dataSource.project.user>
+        <dataSource.project.password/>
         <liquibase.dropFirst>true</liquibase.dropFirst>
       </properties>
     </profile>
@@ -145,6 +159,10 @@
       <id>prod</id>
       <properties>
         <liquibase.db>prod</liquibase.db>
+        <dataSource.project.driverClass>org.hsqldb.jdbcDriver</dataSource.project.driverClass>
+        <dataSource.project.jdbcURL>jdbc:hsqldb:file:./db/sampleProdDB</dataSource.project.jdbcURL>
+        <dataSource.project.user>SA</dataSource.project.user>
+        <dataSource.project.password/>
         <liquibase.dropFirst>false</liquibase.dropFirst>
       </properties>
     </profile>
@@ -152,6 +170,10 @@
       <id>docker</id>
       <properties>
         <liquibase.db>docker</liquibase.db>
+        <dataSource.project.driverClass>com.mysql.jdbc.Driver</dataSource.project.driverClass>
+        <dataSource.project.jdbcURL>jdbc:mysql://${mysql.host}/sample?createDatabaseIfNotExist=true</dataSource.project.jdbcURL>
+        <dataSource.project.user>admin</dataSource.project.user>
+        <dataSource.project.password>${mysql.pass}</dataSource.project.password>
         <liquibase.dropFirst>false</liquibase.dropFirst>
       </properties>
     </profile>
